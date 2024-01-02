@@ -18,6 +18,15 @@ app.use(express.static('public'));
 app.use(express.json({limit: '200mb'})); 
 app.use(cors());
 
+const hwrapper = async (req, res, handler) => {
+    try {
+        await handler(req, res);
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json('internal server error');
+    }
+}
+
 const handleCreateCollection = async (req, res) => {
     const { key, collectionName, diskBased } = req.body;
     if (key !== secretKey) return res.status(401).json('unauthorized');
@@ -47,11 +56,12 @@ const handleDeleteCollection = async (req, res) => {
 }
 
 const handleAddOpenAIPoint = async (req, res) => {
-    const { openAiKey, collectionName, pointId, content, payload, key } = req.body;
+    console.log(req.body);
+    const { openAIKey, collectionName, pointId, content, payload, key } = req.body;
     if (key !== secretKey) return res.status(401).json('unauthorized');
-    if (!openAiKey || !collectionName || !pointId || !content) return res.status(400).json('bad command');
+    if (!openAIKey || !collectionName || !pointId || !content) return res.status(400).json('bad command');
 
-    const result = await qdrant.addOpenAIPoint(openAiKey, collectionName, pointId, content, payload ? true : false);
+    const result = await qdrant.addOpenAIPoint(openAIKey, collectionName, pointId, content, payload ? true : false);
     return res.status(200).json(result);
 }
 
@@ -59,10 +69,10 @@ app.get('/', (req, res) => {
     res.send('Hello, World!');
 });
 
-app.post('/createCollection', (req, res) => handleCreateCollection(req, res));
-app.post('/collectionInfo', (req, res) => handleCollectionInfo(req, res));
-app.post('/deleteCollection', (req, res) => handleDeleteCollection(req, res));
-app.post('/addOpenAIPoint', (req, res) => handleAddOpenAIPoint(req, res));
+app.post('/createCollection', (req, res) => hwrapper(req, res, handleCreateCollection));
+app.post('/collectionInfo', (req, res) => hwrapper(req, res, handleCollectionInfo));
+app.post('/deleteCollection', (req, res) => hwrapper(req, res, handleDeleteCollection));
+app.post('/addOpenAIPoint', (req, res) => hwrapper(req, res, handleAddOpenAIPoint));
 
 const httpsServer = https.createServer({
     key: fs.readFileSync(privateKeyPath),
