@@ -27,6 +27,7 @@ exports.createCollection = async (collectionName, size, onDiskPayload = false, d
     try {
         const response = await axios(request);
         console.log(response.data);   
+        return response.data;
     } catch(err) {
         
         if (err.response && err.response.data) {
