@@ -164,7 +164,7 @@ exports.getOpenAIContexts = async (openAIKey, collectionName, query, limit = 3) 
         console.log('results', results);
         const contextIds = [];
         for (let i = 0; i < results.length; ++i) {
-            contextIds.push(results[i].id);
+            contextIds.push({id: results[i].id, payload: results[i].payload ? results[i].payload : {}});
         }
         return contextIds;
     } catch (err) {
