@@ -60,7 +60,8 @@ exports.deleteCollection = async (collectionName) => {
         method: 'DELETE'
     }
 
-    return axios(request);
+    const response =  axios(request);
+    return response.data;
 }
 
 exports.addPoint = async (collectionName, point) => {

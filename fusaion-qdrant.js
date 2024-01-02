@@ -46,6 +46,15 @@ const handleDeleteCollection = async (req, res) => {
     return res.status(200).json(result);
 }
 
+const handleAddOpenAIPoint = async (req, res) => {
+    const { openAiKey, collectionName, pointId, content, payload, key } = req.body;
+    if (key !== secretKey) return res.status(401).json('unauthorized');
+    if (!openAiKey || !collectionName || !pointId || !content) return res.status(400).json('bad command');
+
+    const result = await qdrant.addOpenAIPoint(openAiKey, collectionName, pointId, content, payload ? true : false);
+    return res.status(200).json(result);
+}
+
 app.get('/', (req, res) => {
     res.send('Hello, World!');
 });
@@ -53,6 +62,7 @@ app.get('/', (req, res) => {
 app.post('/createCollection', (req, res) => handleCreateCollection(req, res));
 app.post('/collectionInfo', (req, res) => handleCollectionInfo(req, res));
 app.post('/deleteCollection', (req, res) => handleDeleteCollection(req, res));
+app.post('/addOpenAIPoint', (req, res) => handleAddOpenAIPoint(req, res));
 
 const httpsServer = https.createServer({
     key: fs.readFileSync(privateKeyPath),
