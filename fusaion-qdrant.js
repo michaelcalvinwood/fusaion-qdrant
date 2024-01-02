@@ -61,7 +61,7 @@ const handleAddOpenAIPoint = async (req, res) => {
     if (key !== secretKey) return res.status(401).json('unauthorized');
     if (!openAIKey || !collectionName || !pointId || !content) return res.status(400).json('bad command');
 
-    const result = await qdrant.addOpenAIPoint(openAIKey, collectionName, pointId, content, payload ? true : false);
+    const result = await qdrant.addOpenAIPoint(openAIKey, collectionName, pointId, content, payload ? payload : false);
     return res.status(200).json(result);
 }
 

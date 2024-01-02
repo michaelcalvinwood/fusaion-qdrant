@@ -1,3 +1,6 @@
+// Qdrant native authentication and security: https://qdrant.tech/documentation/guides/security/
+// Qdrant configuration file: https://qdrant.tech/documentation/guides/configuration/#:~:text=To%20change%20or%20correct%20Qdrant's,yaml.
+
 require ('dotenv').config();
 const axios = require('axios');
 const { Configuration, OpenAIApi } = require("openai");
@@ -89,6 +92,17 @@ exports.addPoint = async (collectionName, point) => {
     }
 
     if (payload) request.data.points[0].payload = payload;
+    console.log('request', JSON.stringify(request, null, 4));
+
+    try {
+        const response = await axios(request);
+        console.log("Add point", response.data);
+        return response.data;
+    } catch (err) {
+        console.log('ERROR', Object.keys(err), err.message, err.response.data);
+        return false;
+    }
+    
 
     return axios(request);
 }
