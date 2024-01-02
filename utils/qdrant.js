@@ -147,6 +147,7 @@ exports.getOpenAIContexts = async (openAIKey, collectionName, query, limit = 3) 
         response = await axios(request);
         //console.log(response.data);
         const results = response.data.result;
+        console.log('results', results);
         const contextIds = [];
         for (let i = 0; i < results.length; ++i) {
             contextIds.push(results[i].id);
