@@ -9,6 +9,8 @@ const https = require('https');
 const cors = require('cors');
 const fs = require('fs');
 
+const qdrant = require('./utils/qdrant');
+
 const app = express();
 app.use(express.static('public'));
 app.use(express.json({limit: '200mb'})); 
