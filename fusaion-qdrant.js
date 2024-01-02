@@ -23,7 +23,7 @@ const handleCreateCollection = async (req, res) => {
     if (key !== secretKey) return res.status(401).json('unauthorized');
     if (!collectionName) return res.status(400).json('bad command');
 
-    const result = qdrant.createOpenAICollection(collectionName, diskBased ? true : false);
+    const result = await qdrant.createOpenAICollection(collectionName, diskBased ? true : false);
     if (result !== false) return res.status(200).json(result);
     return res.status(500).json('internal server error');
 }
@@ -33,7 +33,16 @@ const handleCollectionInfo = async (req, res) => {
     if (!collectionName) return res.status(400).json('bad command');
     if (key !== secretKey) return res.status(401).json('unauthorized');
 
-    const result = qdrant.collectionInfo(collectionName);
+    const result = await qdrant.collectionInfo(collectionName);
+    return res.status(200).json(result);
+}
+
+const handleDeleteCollection = async (req, res) => {
+    const { key, collectionName } = req.body;
+    if (!collectionName) return res.status(400).json('bad command');
+    if (key !== secretKey) return res.status(401).json('unauthorized');
+
+    const result = await qdrant.deleteCollection(collectionName);
     return res.status(200).json(result);
 }
 
@@ -43,6 +52,7 @@ app.get('/', (req, res) => {
 
 app.post('/createCollection', (req, res) => handleCreateCollection(req, res));
 app.post('/collectionInfo', (req, res) => handleCollectionInfo(req, res));
+app.post('/deleteCollection', (req, res) => handleDeleteCollection(req, res));
 
 const httpsServer = https.createServer({
     key: fs.readFileSync(privateKeyPath),

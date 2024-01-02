@@ -49,7 +49,9 @@ exports.collectionInfo = async (collectionName) => {
         method: 'get'
     }
 
-    return axios(request);
+    const response = await axios(request);
+
+    return response.data;
 }
 
 exports.deleteCollection = async (collectionName) => {
