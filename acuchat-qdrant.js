@@ -1,8 +1,8 @@
 require('dotenv').config();
 const listenPort = process.argv.length === 2 ? 5025 : 5325;
 const hostname = 'app.fusaion.ai'
-const privateKeyPath = `/etc/letsencrypt/live/qdrant.fusaion.ai/privkey.pem`;
-const fullchainPath = `/etc/letsencrypt/live/qdrant.fusaion.ai/fullchain.pem`;
+const privateKeyPath = `/etc/letsencrypt/live/qdrant.acuchat.ai/privkey.pem`;
+const fullchainPath = `/etc/letsencrypt/live/qdrant.acuchat.ai/fullchain.pem`;
 
 const express = require('express');
 const https = require('https');

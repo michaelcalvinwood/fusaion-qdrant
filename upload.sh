@@ -1,2 +1,2 @@
 #!/bin/bash
-rsync -a --exclude="node_modules" . root@qdrant.fusaion.ai:/home/acuchat-qdrant/
+rsync -a --exclude="node_modules" . root@qdrant.acuchat.ai:/home/acuchat-qdrant/
