@@ -70,9 +70,7 @@ const handleDeleteContent = async (req, res) => {
     const { collectionName, contentId } = req.body;
     if (!contentId || !collectionName) return res.status(400).json('bad command');
     
-
-
-    const result = await qdrant.deleteCollection(collectionName);
+    const result = await qdrant.deleteContent(collectionName, contentId);
     return res.status(200).json(result);
 }
 
@@ -90,8 +88,11 @@ const handleGetContentPoints = async (req, res) => {
     const { collectionName, contentId } = req.body;
 
     if (!collectionName || !contentId ) return res.status(400).json('Bad command');
-    return await qdrant.getContentPoints(collectionName, contentId);
+    const result = await qdrant.getContentPoints(collectionName, contentId);
+    return res.status(200).json(result);
 }
+
+
 
 const handleQuery = async (req, res) => {
     const { openAIKey, query, collectionName, key } = req.body;

@@ -7,28 +7,46 @@ const { Configuration, OpenAIApi } = require("openai");
 const { v4: uuidv4 } = require('uuid');
 const openai = require('./openai');
 
+const contentIdFilter = (contentId) => {
+    return {
+        filter: {
+            must: [
+                {key: "cid", match: {value: contentId}}
+            ]
+        }
+    }
+}
+
 exports.getContentPoints = async (collectionName, contentId) => {
     const request = {
-        url: `http://127.0.0.1:6333/collections/${collectionName}`,
+        url: `http://127.0.0.1:6333/collections/${collectionName}/points/scroll`,
         method: 'post',
         headers: {
             'Content-Type': 'application/json;charset=UTF-8',
             "Access-Control-Allow-Origin": "*",
         },
-        data: {
-            filter: {
-                must: [
-                    {key: "cid", match: {value: contentId}}
-                ]
-            }
-        }
+        data: contentIdFilter(contentId)
     }
 
     const response = await axios(request);
 
     return response.data;
+}
 
+exports.deleteContent = async (collectionName, contentId) => {
+    const request = {
+        url: `http://127.0.0.1:6333/collections/${collectionName}/points/delete`,
+        method: 'post',
+        headers: {
+            'Content-Type': 'application/json;charset=UTF-8',
+            "Access-Control-Allow-Origin": "*",
+        },
+        data: contentIdFilter(contentId)
+    }
 
+    const response = await axios(request);
+
+    return response.data;
 }
 
 exports.createCollection = async (collectionName, size, onDiskPayload = false, distance = 'Cosine') => {
