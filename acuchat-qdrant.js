@@ -1,6 +1,5 @@
 require('dotenv').config();
 const listenPort = process.argv.length === 2 ? 5025 : 5325;
-const hostname = 'app.fusaion.ai'
 const privateKeyPath = `/etc/letsencrypt/live/qdrant.acuchat.ai/privkey.pem`;
 const fullchainPath = `/etc/letsencrypt/live/qdrant.acuchat.ai/fullchain.pem`;
 
@@ -18,6 +17,18 @@ app.use(express.static('public'));
 app.use(express.json({limit: '200mb'})); 
 app.use(cors());
 
+const swrapper = async (req, res, handler) => {
+    try {
+        const { key } = req.body;
+        if (!key) return res.status(400).json('bad command');
+        if (key !== secretKey) return res.status(401).json('unauthorized');
+        await handler(req, res);
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json('internal server error');
+    }
+}
+
 const hwrapper = async (req, res, handler) => {
     try {
         await handler(req, res);
@@ -28,10 +39,10 @@ const hwrapper = async (req, res, handler) => {
 }
 
 const handleCreateCollection = async (req, res) => {
-    const { key, collectionName, diskBased } = req.body;
+    let { key, collectionName, diskBased } = req.body;
     if (key !== secretKey) return res.status(401).json('unauthorized');
     if (!collectionName) return res.status(400).json('bad command');
-
+    if (typeof diskBased === 'undefined') diskBased = true;
     const result = await qdrant.createOpenAICollection(collectionName, diskBased ? true : false);
     if (result !== false) return res.status(200).json(result);
     return res.status(500).json('internal server error');
@@ -55,6 +66,16 @@ const handleDeleteCollection = async (req, res) => {
     return res.status(200).json(result);
 }
 
+const handleDeleteContent = async (req, res) => {
+    const { collectionName, contentId } = req.body;
+    if (!contentId || !collectionName) return res.status(400).json('bad command');
+    
+
+
+    const result = await qdrant.deleteCollection(collectionName);
+    return res.status(200).json(result);
+}
+
 const handleAddOpenAIPoint = async (req, res) => {
     console.log(req.body);
     const { openAIKey, collectionName, pointId, content, payload, key } = req.body;
@@ -63,6 +84,13 @@ const handleAddOpenAIPoint = async (req, res) => {
 
     const result = await qdrant.addOpenAIPoint(openAIKey, collectionName, pointId, content, payload ? payload : false);
     return res.status(200).json(result);
+}
+
+const handleGetContentPoints = async (req, res) => {
+    const { collectionName, contentId } = req.body;
+
+    if (!collectionName || !contentId ) return res.status(400).json('Bad command');
+    return await qdrant.getContentPoints(collectionName, contentId);
 }
 
 const handleQuery = async (req, res) => {
@@ -84,8 +112,10 @@ app.get('/', (req, res) => {
 app.post('/createCollection', (req, res) => hwrapper(req, res, handleCreateCollection));
 app.post('/collectionInfo', (req, res) => hwrapper(req, res, handleCollectionInfo));
 app.post('/deleteCollection', (req, res) => hwrapper(req, res, handleDeleteCollection));
+app.post('/deleteContent', (req, res) => swrapper(req, res, handleDeleteContent));
 app.post('/addOpenAIPoint', (req, res) => hwrapper(req, res, handleAddOpenAIPoint));
 app.post('/query', (req, res) => hwrapper(req, res, handleQuery));
+app.post('/getContentPoints', (req, res) => swrapper(req, res, handleGetContentPoints));
 
 const httpsServer = https.createServer({
     key: fs.readFileSync(privateKeyPath),

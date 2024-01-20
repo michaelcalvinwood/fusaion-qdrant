@@ -7,6 +7,30 @@ const { Configuration, OpenAIApi } = require("openai");
 const { v4: uuidv4 } = require('uuid');
 const openai = require('./openai');
 
+exports.getContentPoints = async (collectionName, contentId) => {
+    const request = {
+        url: `http://127.0.0.1:6333/collections/${collectionName}`,
+        method: 'post',
+        headers: {
+            'Content-Type': 'application/json;charset=UTF-8',
+            "Access-Control-Allow-Origin": "*",
+        },
+        data: {
+            filter: {
+                must: [
+                    {key: "cid", match: {value: contentId}}
+                ]
+            }
+        }
+    }
+
+    const response = await axios(request);
+
+    return response.data;
+
+
+}
+
 exports.createCollection = async (collectionName, size, onDiskPayload = false, distance = 'Cosine') => {
     const request = {
         url: `http://127.0.0.1:6333/collections/${collectionName}`,
@@ -92,11 +116,11 @@ exports.addPoint = async (collectionName, point) => {
     }
 
     if (payload) request.data.points[0].payload = payload;
-    console.log('request', JSON.stringify(request, null, 4));
+    //console.log('request', JSON.stringify(request, null, 4));
 
     try {
         const response = await axios(request);
-        console.log("Add point", response.data);
+        console.log("qdrant.js addPoint(): axios response", response.data);
         return response.data;
     } catch (err) {
         console.log('ERROR', Object.keys(err), err.message, err.response.data);
@@ -111,7 +135,7 @@ exports.addOpenAIPoint = async (openAiKey, collectionName, pointId, content, pay
     console.log('qdrant addOpenAIPoint content', content);
     let vector = await openai.getEmbedding(openAiKey, content);
 
-    console.log('Embedding Vector', vector);
+    console.log('Embedding Vector', vector.length);
 
     if (vector === false) return false;
 
