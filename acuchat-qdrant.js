@@ -24,7 +24,7 @@ const swrapper = async (req, res, handler) => {
         if (key !== secretKey) return res.status(401).json('unauthorized');
         await handler(req, res);
     } catch (err) {
-        console.error(err);
+        console.error(err.data && err.response.data ? err.response.data: err);
         return res.status(500).json('internal server error');
     }
 }
@@ -33,7 +33,10 @@ const hwrapper = async (req, res, handler) => {
     try {
         await handler(req, res);
     } catch (err) {
-        console.error(err);
+        
+        //console.error(err.data && err.response.data ? err.response.data: err);
+        console.error(err.response.data);
+        console.log('hwrapper error');
         return res.status(500).json('internal server error');
     }
 }
