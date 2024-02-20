@@ -1,7 +1,7 @@
 require('dotenv').config();
 const listenPort = process.argv.length === 2 ? 5025 : 5325;
-const privateKeyPath = `/etc/letsencrypt/live/qdrant.acuchat.ai/privkey.pem`;
-const fullchainPath = `/etc/letsencrypt/live/qdrant.acuchat.ai/fullchain.pem`;
+const privateKeyPath = `/etc/ssl-keys/acuchat.ai/acuchat.ai.key`;
+const fullchainPath = `/etc/ssl-keys/acuchat.ai/acuchat.ai.pem`;
 
 const express = require('express');
 const https = require('https');
@@ -71,6 +71,7 @@ const handleDeleteCollection = async (req, res) => {
 
 const handleDeleteContent = async (req, res) => {
     const { collectionName, contentId } = req.body;
+    console.log('handleDeleteContent collectionName contentId', collectionName, contentId);
     if (!contentId || !collectionName) return res.status(400).json('bad command');
     
     const result = await qdrant.deleteContent(collectionName, contentId);
